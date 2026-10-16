@@ -1,50 +1,82 @@
 
-var map = L.map('map').setView([51.904, 4.463], 14);
+const theMap = L.map('map').setView([51.904, 4.463], 14);
 
 L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
     maxZoom: 19,
     attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>'
-}).addTo(map);
+}).addTo(theMap);
 
-const markerLayer = L.layerGroup().addTo(map);
+// Set up the clustering, and the behaviour inside the clusters
+const theMarkersGroup = L.markerClusterGroup({
 
-//fetch(`/api/markers?minLat=${minLat}&minLng=${minLng}&maxLat=${maxLat}&maxLng=${maxLng}`)
-/*fetch(`/api/markers?minLat=4.4&minLng=51.5&maxLat=5.4&maxLng=52.5`)
-	.then(response => response.json())
-	.then(geoJsonData => {
+	iconCreateFunction: function(cluster) {
+		
+		const markers = cluster.getAllChildMarkers();
+		let clusterVisits = 0;
+		
+		markers.forEach(marker => {
+			if (marker.feature?.properties.visits) {
+				clusterVisits += marker.feature.properties.visits;
+			}
+		});
+		
+		return getIcon("",clusterVisits);
+	}	
 	
-	alert(geoJsonData)
+});
+
+
+// return an icon
+function getIcon(label, count) {
 	
-    // Clear old pins out of view
-    markerLayer.clearLayers();
+	// TODO do we need a label?
+	// TODO circle size must increase with visits
+	
+	let	clusterClass = 'vmap-icon-1' 
+	
+	if (count > 500) {
+		clusterClass = 'vmap-icon-3';
+	} else if (count > 100) {
+		clusterClass = 'vmap-icon-2';
+	} 
+	
+	return L.divIcon({
+
+	/*html: `<div><span>${count}</span></div>`,
+	  className: `vmap-icon ${clusterClass}`,
+	  iconSize: L.point(40, 40) // icon size
+	*/
+	  
+	  html: this.getCircleAsHtml(count),
+	  className: "vmap-marker-icon",
+	  iconSize: L.Point(0, 0)
+	  
+	});		
+
+}
+
+
+theMap.addLayer(theMarkersGroup);
+
+theMap.whenReady(() => {
+   
+    // initial rendering
+    renderMarkers(theMap, theMarkersGroup); 
     
-    // Plot new markers and hook up popups
-    L.geoJSON(geoJsonData, {
-        onEachFeature: function (feature, layer) {
-            // Check if the feature has properties defined
-            if (feature.properties?.name) {
-                layer.bindPopup(`<b>${feature.properties.name}</b><br>${feature.properties.description}`);
-            }
-        }
-    }).addTo(markerLayer);
-})
-.catch(err => console.error("Error loading map data:", err));	
-*/
-
-map.on('moveend', viewportChanged);
+    // setup pan & move handler
+	theMap.on('moveend', () => renderMarkers(theMap, theMarkersGroup));
+});
 
 
-function viewportChanged(e) {
+function renderMarkers(map, markersGroup) {	
 	
-	const map = e.target;
-	
-	console.log("Viewport changed ", map.getBounds())
+	console.log("Viewport changed ", map.getBounds());
 	
 	const center = map.getCenter();
 	const lon = center.lng;
 	const lat = center.lat;
 
-	// Get the bounding box corners to calculate real-world distance
+	// Get corners to calculate distance
 	const bounds = map.getBounds();
 	const northEast = bounds.getNorthEast();
 	const southWest = bounds.getSouthWest();
@@ -59,7 +91,7 @@ function viewportChanged(e) {
 	const topPoint = L.latLng(northEast.lat, lon);
 	const heightInMeters = map.distance(bottomPoint, topPoint);
 
-	// Convert to kilometers
+	// Convert to km
 	const widthInKm = widthInMeters / 1000;
 	const heightInKm = heightInMeters / 1000;	
 	
@@ -78,22 +110,75 @@ function viewportChanged(e) {
 		
 		console.log(geoJsonData)
 		
-	    // Clear old pins out of view
-	    markerLayer.clearLayers();
+	    // Clear old markers
+	    markersGroup.clearLayers();
 	    
-	    // Plot new markers and hook up popups
-	    L.geoJSON(geoJsonData, {
+	    // Render new markers
+	    const newLayer = L.geoJSON(geoJsonData, {
+			
+			pointToLayer: function (feature, latlng) {
+
+			    visits = feature.properties?.visits || 1; // default =1
+			    const customIcon = getIcon("", visits);
+			    return L.marker(latlng, { icon: customIcon });
+			},			
+			
 	        onEachFeature: function (feature, layer) {
-	            // Check if the feature has properties defined
+
 	            if (feature.properties?.name) {
-	                layer.bindPopup(`<b>${feature.properties.name}</b><br>${feature.properties.description}`);
+	                layer.bindPopup(`<b>${feature.properties.name}</b><br>${feature.properties.visits}`);
 	            }
 	        }
-	    }).addTo(markerLayer);
+	    });
+		
+		markersGroup.addLayer(newLayer);
 	})
 	.catch(err => console.error("Error loading map data:", err));
-	
 }
 
 
+function getCircleAsHtml(weight) {
+  
+	const scalingFactor = 1;
+	const circleSizePixels = 150;
+	
+    const mWeight = Math.sqrt(weight) * scalingFactor // TODO do not calculate every time
+    let diameter, clazz
+
+    // set circle properties
+    if (mWeight >= circleSizePixels * .9) {
+        diameter = mWeight
+        clazz = "mb-large"
+    }
+    else if (mWeight > circleSizePixels * .09) {
+        diameter = Math.max(30, mWeight)
+        clazz = "mb-medium"
+    }
+    else if (mWeight > circleSizePixels * .009) {
+        diameter = Math.max(30, mWeight)
+        clazz = "mb-small"
+    }
+    else {
+        diameter = 20
+        clazz = "mb-tiny"
+    }
+
+    const radius = diameter / 2;
+
+    const markerbox =
+        `<div class="vmap-marker-box ${clazz}" mweight="${mWeight}" style="`
+        + `width:${diameter}px;`
+        + `height:${diameter}px;`
+        + `margin:-${radius}px 0 0 -${radius}px;`
+        + `">`
+        + `<div class="vmap-marker-circle" style="`
+        + `border-radius:${radius}px;`
+        + `"></div>`
+        + `<div class="vmap-marker-caption" style="`
+        + `line-height:${diameter}px;`
+        + `">${weight}</div>`
+        + `</div>`
+
+    return markerbox;
+}
 

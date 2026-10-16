@@ -29,7 +29,7 @@ public class Main {
 	    		
 	    		logger.info(ctx.fullUrl());
 	    		
-	    		// Todo we need some input validation here on the params being available and well formed 
+	    		// Todo we need some input validation here on the params being available and well formed  
                 double lat = Double.parseDouble(ctx.queryParam("lat"));
                 double lon = Double.parseDouble(ctx.queryParam("lon"));
                 double width = Double.parseDouble(ctx.queryParam("width"));
