@@ -30,16 +30,16 @@ public class App {
         	
         	logger.info("Starting IP ingestion...");
             CSV2RedisIngester ipIngester = new CSV2RedisIngester(redisClient, new IPRowIngestionStrategy(prefix));
-            ipIngester.ingestCSV(Path.of("data/IP2LOCATION-LITE-DB5.CSV"));
+            ipIngester.ingestCSV(Path.of("/home/acdhirr/Downloads/logs/ip2location/IP2LOCATION-LITE-DB5.CSV"));
             logger.info("Ingestion ready!");
             
             logger.info("Starting Nginx Logs ingestion...");
             String scriptSha = LuaScripts.loadInsertVisitsScript(redisClient,prefix);
             CSV2RedisIngester logIngester =  new CSV2RedisIngester(redisClient, new SWWLogRowIngestionStrategy(scriptSha));
             CSVIngestSettings settings = new CSVIngestSettings(CSVIngestSettings.Separator.SPACE);
-            logIngester.ingestDirectory(Path.of("/home/acdhirr/Downloads/logs/"), settings);
+            logIngester.ingestDirectory(Path.of("/home/acdhirr/Downloads/logs/sww/"), settings);
             logger.info("Ingestion ready!");
         }    
     }
-    
+   
 }
