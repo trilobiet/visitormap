@@ -110,7 +110,7 @@ function renderMarkers(map, markersGroup) {
 		
 		console.log(geoJsonData)
 		
-	    // Clear old markers
+	    // Clear old markers. TODO find some way to leave them but add only the new markers, so we can have nice transition effects.
 	    markersGroup.clearLayers();
 	    
 	    // Render new markers

@@ -16,7 +16,7 @@ public class Main {
 
 	public static void main(String... args) {
 		
-		RedisDao dao = new RedisDaoDummyImpl();
+		RedisDao dao = new RedisDaoImpl();
 	    
 		Javalin app = Javalin.create(config -> {
 
@@ -35,7 +35,7 @@ public class Main {
                 double width = Double.parseDouble(ctx.queryParam("width"));
                 double height = Double.parseDouble(ctx.queryParam("height"));
                 
-                List<com.trilobiet.visitorstats.web.Location> locations = dao.getForArea(0, 0 , width, height);
+                List<com.trilobiet.visitorstats.web.Location> locations = dao.getForArea(lat, lon , width, height);
                 
                 GeoJsonFeatureCollection geoCollection = GeoJsonFeatureCollection.from(locations);
 
