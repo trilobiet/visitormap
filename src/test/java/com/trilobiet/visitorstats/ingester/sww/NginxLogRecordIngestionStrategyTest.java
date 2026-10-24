@@ -1,4 +1,4 @@
-package com.trilobiet.redistest.ingester.sww;
+package com.trilobiet.visitorstats.ingester.sww;
 
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -6,8 +6,6 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import java.lang.reflect.Method;
 
 import org.junit.jupiter.api.Test;
-
-import com.trilobiet.visitorstats.ingester.sww.SWWLogRowIngestionStrategy;
 
 class NginxLogRecordIngestionStrategyTest {
 	

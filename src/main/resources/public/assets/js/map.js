@@ -1,5 +1,8 @@
 
-const theMap = L.map('map').setView([51.904, 4.463], 14);
+const theMap = L.map('map',{
+		minZoom: 3
+	})
+	.setView([51.904, 4.463], 14);
 
 L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
     maxZoom: 19,
@@ -70,36 +73,14 @@ theMap.whenReady(() => {
 
 function renderMarkers(map, markersGroup) {	
 	
-	console.log("Viewport changed ", map.getBounds());
-	
-	const center = map.getCenter();
-	const lon = center.lng;
-	const lat = center.lat;
-
-	// Get corners to calculate distance
-	const bounds = map.getBounds();
-	const northEast = bounds.getNorthEast();
-	const southWest = bounds.getSouthWest();
-
-	// Calculate width at current latitude
-	const leftPoint = L.latLng(lat, southWest.lng);
-	const rightPoint = L.latLng(lat, northEast.lng);
-	const widthInMeters = map.distance(leftPoint, rightPoint);
-
-	// Calculate height
-	const bottomPoint = L.latLng(southWest.lat, lon);
-	const topPoint = L.latLng(northEast.lat, lon);
-	const heightInMeters = map.distance(bottomPoint, topPoint);
-
-	// Convert to km
-	const widthInKm = widthInMeters / 1000;
-	const heightInKm = heightInMeters / 1000;	
+	const dims = getDims(map);
+	console.log("Map dimensions: ", dims);
 	
 	const params = new URLSearchParams();
-	params.append("lat", lat);
-	params.append("lon", lon);
-	params.append("width", widthInKm);
-	params.append("height", heightInKm);
+	params.append("lat", dims.lat);
+	params.append("lon", dims.lon);
+	params.append("width", dims.widthKm);
+	params.append("height", dims.heightKm);
 	
 	console.log('/api/markers?',params)
 	// http://localhost:7070/api/markers?lat=51.860167605042925&lon=4.556579589843751&width=90.53323848030078&height=51.25580116315021
@@ -181,4 +162,46 @@ function getCircleAsHtml(weight) {
 
     return markerbox;
 }
+
+
+function getDims(map) {
+	
+    // 1. Get map center
+    const center = map.getCenter();
+    const lon = center.lng;
+    const lat = center.lat;
+
+	// get map zoom	
+	const curZoom = map.getZoom();
+	const zoomThreshold = 3;
+	
+	let widthKm = 40075;
+	let heightKm = 20004;
+    
+	// below threshold height and width will be inaccurate so just take the entire world
+	if (curZoom > zoomThreshold) { 
+	
+	    // 2. Get width in Km
+	    const circumferenceEquator = 40075000;
+	    const zoom = map.getZoom();
+	    const metersPerPixelEquator = circumferenceEquator / (256 * Math.pow(2, zoom));
+	    const metersPerPixelCenter = metersPerPixelEquator * Math.cos(lat * Math.PI / 180);
+	    widthKm = (metersPerPixelCenter * map.getSize().x) / 1000;
+	    
+	    // 3. Get height in Km
+	    const bounds = map.getBounds();
+	    const radius = 6371; // earth radius in km
+	    const deltaPhi = Math.abs(bounds.getNorth() - bounds.getSouth()) * Math.PI / 180;
+	    heightKm = radius * deltaPhi;
+	}
+    
+    // 4. Return dims
+    return {
+        lon: lon.toFixed(6),
+        lat: lat.toFixed(6),
+        widthKm: widthKm.toFixed(2),
+        heightKm: heightKm.toFixed(2)
+    };
+}
+
 

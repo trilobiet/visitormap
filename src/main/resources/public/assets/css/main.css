@@ -9,9 +9,17 @@ h1 {
 
 #map { 
 	position: absolute;
-	top: 0; right: 0; bottom: 0; left: 0; 
+	top: 41px; right: 0; bottom: 0; left: 0; 
 }
 
+#controls {
+	position: absolute;
+	top: 0px; right: 0; left: 0;
+	height: 40px;
+	padding: 5px;
+	background-color: #999;
+	text-align: center;
+}
 .vmap-marker-box {
   position: relative;
 }  

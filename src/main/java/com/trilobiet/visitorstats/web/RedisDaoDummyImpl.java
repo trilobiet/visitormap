@@ -2,6 +2,7 @@ package com.trilobiet.visitorstats.web;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 
 public class RedisDaoDummyImpl implements RedisDao {
 
@@ -19,6 +20,18 @@ public class RedisDaoDummyImpl implements RedisDao {
 		lst.add(new Location("loc3", 51.9330, 4.42, 1345));
 		
 		return lst;
+	}
+
+	@Override
+	public Set<String> getKeys() {
+
+		return null;
+	}
+
+	@Override
+	public Set<String> getDates() {
+
+		return null;
 	}
 
 }

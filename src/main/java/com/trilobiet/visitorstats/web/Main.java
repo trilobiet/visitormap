@@ -1,6 +1,8 @@
 package com.trilobiet.visitorstats.web;
 
 import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -9,6 +11,8 @@ import com.trilobiet.visitorstats.ingester.App;
 
 import io.javalin.Javalin;
 import io.javalin.http.staticfiles.Location;
+import redis.clients.jedis.ConnectionPoolConfig;
+import redis.clients.jedis.RedisClient;
 
 public class Main {
 	
@@ -16,7 +20,10 @@ public class Main {
 
 	public static void main(String... args) {
 		
-		RedisDao dao = new RedisDaoImpl();
+		RedisClient redisClient = getRedisClient();
+		
+		RedisDao dao = new RedisDaoImpl(redisClient);
+		//RedisDao dao = new RedisDaoDummyImpl();
 	    
 		Javalin app = Javalin.create(config -> {
 
@@ -24,6 +31,12 @@ public class Main {
 			
 			// css, js, images
 	    	config.staticFiles.add("public", Location.CLASSPATH);
+	    	
+		    // close redisClient on shutdown
+	        config.events.serverStopping(() -> {
+	            logger.info("Javalin stopped. Closing redisClient... ");
+	            redisClient.close();
+	        });
 	    	
 	    	config.routes.get("/api/markers", ctx -> {
 	    		
@@ -41,13 +54,49 @@ public class Main {
 
                 ctx.json(geoCollection);
                 
-            });	    	
+            });	    
+	    	
+	    	// Get keys as a list of options
+	    	config.routes.get("/keys", ctx -> {
+	    		
+	    		Set<String> keys = dao.getKeys();
+	    		
+	    		List<String> options = keys.stream().map(key -> "<option>" + key + "</option>")
+	    		 .toList();
+	    		
+	    		ctx.result(String.join("",options));
+	    	});
+
+	    	// Get dates as a list of options
+	    	config.routes.get("/dates", ctx -> {
+	    		
+	    		logger.info("DATES REQUESTED");
+	    		
+	    		Set<String> dates = dao.getDates();
+	    		
+	    		List<String> options = dates.stream().map(date -> "<option>" + date + "</option>")
+	    		 .toList();
+	    		
+	    		ctx.result(String.join("",options));
+	    	});
 	    	
 	    });
 		
 	    app.start(7070);
 	}
 	
-	//private static getConfig
+	
+	public static RedisClient getRedisClient() {
+		
+		ConnectionPoolConfig poolConfig = new ConnectionPoolConfig();
+		poolConfig.setMaxTotal(64);
+		poolConfig.setMaxIdle(64);
+
+		return RedisClient.builder()
+			.poolConfig(poolConfig)
+			.hostAndPort("localhost", 6379)
+			.build();
+    }
+	
 }
 

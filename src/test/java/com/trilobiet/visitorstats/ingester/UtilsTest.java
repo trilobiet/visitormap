@@ -1,4 +1,4 @@
-package com.trilobiet.redistest.ingester;
+package com.trilobiet.visitorstats.ingester;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
