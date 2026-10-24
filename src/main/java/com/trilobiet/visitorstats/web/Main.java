@@ -2,7 +2,6 @@ package com.trilobiet.visitorstats.web;
 
 import java.util.List;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -61,8 +60,9 @@ public class Main {
 	    		
 	    		Set<String> keys = dao.getKeys();
 	    		
-	    		List<String> options = keys.stream().map(key -> "<option>" + key + "</option>")
-	    		 .toList();
+	    		List<String> options = keys.stream()
+	    			.map(key -> "<option>" + key + "</option>")
+	    			.toList();
 	    		
 	    		ctx.result(String.join("",options));
 	    	});
@@ -70,12 +70,11 @@ public class Main {
 	    	// Get dates as a list of options
 	    	config.routes.get("/dates", ctx -> {
 	    		
-	    		logger.info("DATES REQUESTED");
-	    		
 	    		Set<String> dates = dao.getDates();
 	    		
-	    		List<String> options = dates.stream().map(date -> "<option>" + date + "</option>")
-	    		 .toList();
+	    		List<String> options = dates.stream()
+	    			.map(date -> "<option>" + date + "</option>")
+	    			.toList();
 	    		
 	    		ctx.result(String.join("",options));
 	    	});

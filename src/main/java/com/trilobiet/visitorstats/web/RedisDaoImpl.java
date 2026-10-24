@@ -8,6 +8,7 @@ import java.util.TreeSet;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
+import redis.clients.jedis.GeoCoordinate;
 import redis.clients.jedis.RedisClient;
 import redis.clients.jedis.args.GeoUnit;
 import redis.clients.jedis.params.GeoSearchParam;
@@ -51,19 +52,28 @@ public class RedisDaoImpl implements RedisDao {
 		System.out.println("lstGeo: " + lstGeo.size() + " lstGeoScores: " + lstGeoScores.size());
 		
 		
-		// STEP 3. Load the shorter list into a hashMap (lstGeo, on average, will be the shorter unless we have very few site visitors...)
-		Map<String, GeoRadiusResponse> mapGeo = lstGeo.stream().collect(Collectors.toMap(GeoRadiusResponse::getMemberByString,Function.identity()));
+		// STEP 3. Load the shorter list into a hashMap 
+		// (lstGeo, on average, will be the shorter one unless we have very few site visitors...)
+		Map<String, GeoRadiusResponse> mapGeo = lstGeo.stream()
+			.collect(Collectors.toMap(GeoRadiusResponse::getMemberByString,Function.identity()));
 		
 		// STEP 4. merge the lists (join)
 		lstGeoScores.stream()
 		     // only geo scores that are in our area (mapGeo)
 			.filter(gs -> mapGeo.containsKey(gs.getElement()))
 			.map(gs -> {
-				// TODO construct Location object 
+				GeoCoordinate geo = mapGeo.get(gs.getElement()).getCoordinate();
+				Location location = new Location(
+					gs.getElement(),
+					geo.getLatitude(),
+					geo.getLongitude(),
+					gs.getScore()
+				);
+				// TODO return Location object 
 				return null;
 			});
 		
-		return List.of(); // TODO remove
+		return List.of(); // TODO implement
 	}
 
 

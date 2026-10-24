@@ -24,5 +24,5 @@ public record GeoJsonFeatureCollection(
 
 record GeoJsonFeature( String type, Geometry geometry, Properties properties ) {}
 record Geometry( String type, List<Double> coordinates ) {}
-record Properties( String name, Integer visits ) {}
+record Properties( String name, Double visits ) {}
 
