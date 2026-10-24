@@ -1,8 +1,10 @@
 package com.trilobiet.visitorstats.web;
 
+import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.TreeSet;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -71,8 +73,10 @@ public class RedisDaoImpl implements RedisDao {
 		Set<String> allKeys = redisClient.keys("*:visits:*");
 
 		return allKeys.stream()
+			.sorted(Comparator.reverseOrder())	
 			.map(key -> key.substring(0, key.lastIndexOf(":"))) // remove date part
-			.collect(Collectors.toSet());
+			//.collect(Collectors.toSet());
+			.collect(Collectors.toCollection(TreeSet::new)); // explicitely create a TreeSet to maintain order  
 	}
 
 	
@@ -81,8 +85,9 @@ public class RedisDaoImpl implements RedisDao {
 
 		Set<String> allKeys = redisClient.keys("*:visits:all:*");
 		return allKeys.stream()
+			.sorted(Comparator.reverseOrder())	
 			.map(key -> key.substring(key.lastIndexOf(":") + 1)) // select only date part
-			.collect(Collectors.toSet());
+			.collect(Collectors.toCollection(TreeSet::new));
 	}
 
 }

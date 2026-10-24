@@ -43,7 +43,6 @@ public class RedisDaoImplTest {
         assertEquals(2, returnedKeys.size());
         assertTrue(returnedKeys.contains("xyz:visits:/page/whatever"));
         assertTrue(returnedKeys.contains("xyz:visits:/page/whatelse"));
-    	
     }
     
     
