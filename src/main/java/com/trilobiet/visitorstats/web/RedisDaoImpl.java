@@ -36,7 +36,7 @@ public class RedisDaoImpl implements RedisDao {
 		
 		List<GeoRadiusResponse> lstGeo = redisClient.geosearch("sww:geo", geoParams);
 		
-		//lstGeo.forEach(geo -> System.out.println(geo.getMemberByString() + " : " + geo.getCoordinate()));
+		// lstGeo.forEach(geo -> System.out.println(geo.getMemberByString() + " : " + geo.getCoordinate()));
 		
 		// STEP 2. ZRANGE sww:visits:/news:2026-09-28 +inf 1 BYSCORE REV WITHSCORES [LIMIT 0 20]
 		// second number in (+inf 1) denotes minimum score when we run BYSCORE 
@@ -58,24 +58,21 @@ public class RedisDaoImpl implements RedisDao {
 			.collect(Collectors.toMap(GeoRadiusResponse::getMemberByString,Function.identity()));
 		
 		// STEP 4. merge the lists (join)
-		lstGeoScores.stream()
-		     // only geo scores that are in our area (mapGeo)
+		List<Location> lstLocations = lstGeoScores.stream()
+		     // only locations that match geo scores that are in our area (mapGeo)
 			.filter(gs -> mapGeo.containsKey(gs.getElement()))
 			.map(gs -> {
 				GeoCoordinate geo = mapGeo.get(gs.getElement()).getCoordinate();
-				Location location = new Location(
+				return new Location(
 					gs.getElement(),
 					geo.getLatitude(),
 					geo.getLongitude(),
 					gs.getScore()
 				);
-				// TODO return Location object 
-				return null;
-			});
+			}).collect(Collectors.toList());
 		
-		return List.of(); // TODO implement
-	}
-
+		return lstLocations;
+	}	
 
 	@Override
 	public Set<String> getKeys() {

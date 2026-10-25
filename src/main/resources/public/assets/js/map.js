@@ -62,7 +62,7 @@ function getIcon(label, count) {
 theMap.addLayer(theMarkersGroup);
 
 theMap.whenReady(() => {
-   
+	  
     // initial rendering
     renderMarkers(theMap, theMarkersGroup); 
     
@@ -71,8 +71,41 @@ theMap.whenReady(() => {
 });
 
 
-function renderMarkers(map, markersGroup) {	
+/*
+document.body.addEventListener('htmx:load', function(evt) {
+    // 1. Controleer of het element dat geladen wordt onze #controls container is
+    // (Dit voorkomt dat de code onnodig vaak runt bij andere htmx-verzoeken)
+    const controlsContainer = document.getElementById('controls');
+    
+    if (evt.target === controlsContainer || evt.target.closest('#controls')) {
+        
+        // 2. Zorg dat de kaart klaar is voor actie
+        theMap.whenReady(() => {
+            
+            // 3. Voer de initiële rendering van de markers uit
+            renderMarkers(theMap, theMarkersGroup); 
+            
+            // 4. Zet de move-handler klaar (verwijder eventuele oude listeners om duplicaten te voorkomen)
+            theMap.off('moveend'); 
+            theMap.on('moveend', () => renderMarkers(theMap, theMarkersGroup));
+        });
+        
+    }
+});
+
+*/
+
+
+
+function renderMarkers(map, markersGroup) {
 	
+	// selected path & date
+	let selPath = document.querySelector("#controls [name='path']");
+	let selDate = document.querySelector("#controls [name='date']");
+
+	console.log("Options: ", selPath.options.length)
+	console.log("Path & date: ", selPath.value, " - ", selDate.value)
+
 	const dims = getDims(map);
 	console.log("Map dimensions: ", dims);
 	
