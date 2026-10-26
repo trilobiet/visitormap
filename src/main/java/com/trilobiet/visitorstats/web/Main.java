@@ -46,8 +46,10 @@ public class Main {
                 double lon = Double.parseDouble(ctx.queryParam("lon"));
                 double width = Double.parseDouble(ctx.queryParam("width"));
                 double height = Double.parseDouble(ctx.queryParam("height"));
+                String path = ctx.queryParam("path");
+                String date = ctx.queryParam("date");
                 
-                List<com.trilobiet.visitorstats.web.Location> locations = dao.getForArea(lat, lon , width, height);
+                List<com.trilobiet.visitorstats.web.Location> locations = dao.getForArea(lat, lon , width, height, path, date);
                 
                 GeoJsonFeatureCollection geoCollection = GeoJsonFeatureCollection.from(locations);
 

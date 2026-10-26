@@ -7,7 +7,7 @@ import java.util.Set;
 public class RedisDaoDummyImpl implements RedisDao {
 
 	@Override
-	public List<Location> getForArea(double lat, double lon, double widthKm, double heightKm) {
+	public List<Location> getForArea(double lat, double lon, double widthKm, double heightKm, String path, String date) {
 		
 		List<Location> lst = new ArrayList<>();
 		

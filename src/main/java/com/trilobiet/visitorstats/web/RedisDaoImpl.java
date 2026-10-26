@@ -26,7 +26,7 @@ public class RedisDaoImpl implements RedisDao {
 	}
 	
 	@Override
-	public List<Location> getForArea(double lat, double lon, double widthKm, double heightKm) {
+	public List<Location> getForArea(double lat, double lon, double widthKm, double heightKm, String path, String date) {
 		
 		// STEP 1. GEOSEARCH sww:geo FROMLONLAT 4 51 BYBOX 400 400 KM WITHCOORD
 		GeoSearchParam geoParams = new GeoSearchParam()
@@ -44,8 +44,10 @@ public class RedisDaoImpl implements RedisDao {
 			.zrangeByScoreParams(Double.POSITIVE_INFINITY, 1)
 			.rev();
 		
+		String metric = String.join(":", path, date); 
+		
 		//List<Tuple> lstGeoScores = redisClient.zrangeWithScores("sww:visits:all:totals", zParams);
-		List<Tuple> lstGeoScores = redisClient.zrangeWithScores("sww:visits:/news:2026-09-28", zParams);
+		List<Tuple> lstGeoScores = redisClient.zrangeWithScores(metric, zParams);
 		
 		//lstGeoScores.forEach(System.out::println);
 		
@@ -70,6 +72,8 @@ public class RedisDaoImpl implements RedisDao {
 					gs.getScore()
 				);
 			}).collect(Collectors.toList());
+		
+		System.out.println("Locations: " + lstLocations.size());
 		
 		return lstLocations;
 	}	

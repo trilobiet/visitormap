@@ -19,15 +19,18 @@ public class LuaScripts {
            lookup location:ipstart by ip aton ("India:Karnataka:Bengaluru=17171200-17171455")
         */   
 		+ "local locations = redis.call('ZRANGE', lookUpKey, ipAsNumber, 0, 'BYSCORE', 'REV', 'LIMIT', 0, 1) "
-        // ZRANGE returns a list, so pick the first and only element
+        // ZRANGE returns a list, so pick the first (and only) element
 		+ "local location = locations[1] "
+		// visits for all pages in website
         + "local allVisitsKey = '[prefix]:visits:all' .. ':' .. date "
         + "local allVisitsKeyAllDates = '[prefix]:visits:all:totals' "
         + "redis.call('zincrby', allVisitsKey, 1, location) "
         + "redis.call('zincrby', allVisitsKeyAllDates, 1, location) "
-        // Visits per request (page in website)
-        + "local requestVisitsKey = '[prefix]:visits:' .. request .. ':' .. date "
-        + "redis.call('zincrby', requestVisitsKey, 1, location) "
+        // Visits per page in website
+        + "local pageVisitsKey = '[prefix]:visits:' .. request .. ':' .. date "
+        + "local pageVisitsKeyAllDates = '[prefix]:visits:' .. request .. ':totals' "
+        + "redis.call('zincrby', pageVisitsKey, 1, location) "
+        + "redis.call('zincrby', pageVisitsKeyAllDates, 1, location) "
 		;
 	
 
@@ -35,6 +38,5 @@ public class LuaScripts {
     	
     	return redisClient.scriptLoad(insertVisitsScript.replace("[prefix]", prefix));
     }
-	
 
 }

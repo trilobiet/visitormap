@@ -5,7 +5,7 @@ import java.util.Set;
 
 public interface RedisDao {
 	
-	List<Location> getForArea(double lat, double lon, double widthKm, double heightKm); 
+	List<Location> getForArea(double lat, double lon, double widthKm, double heightKm, String path, String date); 
 	Set<String> getKeys();
 	Set<String> getDates();
 

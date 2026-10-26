@@ -20,6 +20,7 @@ h1 {
 	background-color: #999;
 	text-align: center;
 }
+
 .vmap-marker-box {
   position: relative;
 }  
@@ -41,6 +42,14 @@ h1 {
 .mb-small .vmap-marker-circle { background: rgb(0, 0, 255); }
 .mb-medium .vmap-marker-circle { background: rgb(148, 0, 192); }
 .mb-large .vmap-marker-circle { background: rgb(192, 0, 16); }
+
+/*
+.mb-large .vmap-marker-circle { background: rgb(0, 224, 104); }
+.mb-medium .vmap-marker-circle { background: rgb(0, 100, 100); }
+.mb-small .vmap-marker-circle { background: rgb(64, 64, 200); }
+.mb-tiny .vmap-marker-circle { background: rgb(150, 0, 192); }
+*/
+
 
 .vmap-marker-caption {
   position: absolute;

@@ -2,7 +2,12 @@
 const theMap = L.map('map',{
 		minZoom: 3
 	})
-	.setView([51.904, 4.463], 14);
+	.setView([51.904, 4.463], 6);
+	
+// selected path & date
+const selPath = document.querySelector("#controls [name='path']");
+const selDate = document.querySelector("#controls [name='date']");
+	
 
 L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
     maxZoom: 19,
@@ -45,47 +50,35 @@ function getIcon(label, count) {
 	
 	return L.divIcon({
 
-	/*html: `<div><span>${count}</span></div>`,
-	  className: `vmap-icon ${clusterClass}`,
-	  iconSize: L.point(40, 40) // icon size
-	*/
-	  
 	  html: this.getCircleAsHtml(count),
 	  className: "vmap-marker-icon",
 	  iconSize: L.Point(0, 0)
-	  
 	});		
-
 }
 
 
 theMap.addLayer(theMarkersGroup);
 
-theMap.whenReady(() => {
-	  
-    // initial rendering
-    renderMarkers(theMap, theMarkersGroup); 
-    
-    // setup pan & move handler
-	theMap.on('moveend', () => renderMarkers(theMap, theMarkersGroup));
-});
 
-
-/*
 document.body.addEventListener('htmx:load', function(evt) {
-    // 1. Controleer of het element dat geladen wordt onze #controls container is
-    // (Dit voorkomt dat de code onnodig vaak runt bij andere htmx-verzoeken)
-    const controlsContainer = document.getElementById('controls');
+	
+    const divControls = document.getElementById('controls');
     
-    if (evt.target === controlsContainer || evt.target.closest('#controls')) {
+    //if (evt.target === divControls || evt.target.closest('#controls')) {
+	if (divControls && !divControls.dataset.mapInitialized && (evt.target === divControls || evt.target.closest('#controls'))) {		
+		
+		divControls.dataset.mapInitialized = "true";
+		
+		[selPath, selDate].forEach(selectElement => {
+		  selectElement.addEventListener('change', () => renderMarkers(theMap, theMarkersGroup));
+		});
         
-        // 2. Zorg dat de kaart klaar is voor actie
         theMap.whenReady(() => {
             
-            // 3. Voer de initiële rendering van de markers uit
+			// initial rendering after page load
             renderMarkers(theMap, theMarkersGroup); 
             
-            // 4. Zet de move-handler klaar (verwijder eventuele oude listeners om duplicaten te voorkomen)
+            // setup pan & move handler
             theMap.off('moveend'); 
             theMap.on('moveend', () => renderMarkers(theMap, theMarkersGroup));
         });
@@ -93,16 +86,10 @@ document.body.addEventListener('htmx:load', function(evt) {
     }
 });
 
-*/
-
 
 
 function renderMarkers(map, markersGroup) {
 	
-	// selected path & date
-	let selPath = document.querySelector("#controls [name='path']");
-	let selDate = document.querySelector("#controls [name='date']");
-
 	console.log("Options: ", selPath.options.length)
 	console.log("Path & date: ", selPath.value, " - ", selDate.value)
 
@@ -114,7 +101,10 @@ function renderMarkers(map, markersGroup) {
 	params.append("lon", dims.lon);
 	params.append("width", dims.widthKm);
 	params.append("height", dims.heightKm);
+	params.append("path", selPath.value);
+	params.append("date", selDate.value);
 	
+	console.log(`/api/markers?${new URLSearchParams(params).toString()}`)
 	console.log('/api/markers?',params)
 	// http://localhost:7070/api/markers?lat=51.860167605042925&lon=4.556579589843751&width=90.53323848030078&height=51.25580116315021
 	
@@ -124,7 +114,6 @@ function renderMarkers(map, markersGroup) {
 		
 		console.log(geoJsonData)
 		
-	    // Clear old markers. TODO find some way to leave them but add only the new markers, so we can have nice transition effects.
 	    markersGroup.clearLayers();
 	    
 	    // Render new markers
@@ -200,7 +189,7 @@ function getCircleAsHtml(weight) {
 function getDims(map) {
 	
     // 1. Get map center
-    const center = map.getCenter();
+    const center = map.getCenter().wrap();
     const lon = center.lng;
     const lat = center.lat;
 
@@ -208,8 +197,11 @@ function getDims(map) {
 	const curZoom = map.getZoom();
 	const zoomThreshold = 3;
 	
-	let widthKm = 40075;
-	let heightKm = 20004;
+	const maxWidthKm = 40075;
+	const maxheightKm = 20004;
+	let widthKm = maxWidthKm;
+	let heightKm = maxheightKm;
+	
     
 	// below threshold height and width will be inaccurate so just take the entire world
 	if (curZoom > zoomThreshold) { 
