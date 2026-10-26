@@ -72,6 +72,11 @@ How the REDIS database is used
    
       "Germany:Hessen:Bensheim", 57, (8.595,49.698)	  
 	  
+	  
+How the Leaflet.js map is laid out
+==================================
+
+![world map](./src/main/resources/public/assets/images/world1.png)
 	        
     
 
