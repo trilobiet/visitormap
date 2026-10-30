@@ -14,12 +14,19 @@ public class IPRowIngestionStrategy implements RowIngestionStrategy {
 	
 	private final String prefix;
 	
+	private static final String NAME = "ip2location";
+	
 	public IPRowIngestionStrategy(String prefix) {
 
 		this.prefix = prefix;
 	}
+	
+	@Override
+	public String getName() {
+		return NAME;
+	}
 
-
+	
 	private final List<String> columns = Arrays.asList(
 		"lower","upper","country_code","country","region","city","lat","lon");
 	
@@ -31,12 +38,14 @@ public class IPRowIngestionStrategy implements RowIngestionStrategy {
 	@Override
 	public void ingestRow(String[] row, Pipeline p) {
 		
+		String country = row[idx("country")];
+		
         StringBuilder landRegionCity = new StringBuilder();
         landRegionCity.append(row[idx("country")])
         	.append(":").append(row[idx("region")])
         	.append(":").append(row[idx("city")]);
 		
-		// ZADD mijntest:ranges 755292160 argentina:santa_cruz:los_antigos=767011840-767012863
+		// ZADD mijntest:ranges 755292160 argentina:santa_cruz:los_antigos
 		Map<String,Double> rangeMember = new HashMap<>();
 		rangeMember.put(landRegionCity.toString(), Double.valueOf(row[idx("lower")]));
         p.zadd(prefix + ":ipranges", rangeMember);
@@ -48,5 +57,16 @@ public class IPRowIngestionStrategy implements RowIngestionStrategy {
         ); 
         geoMember.put(landRegionCity.toString(), gc);
         p.geoadd(prefix + ":geo",geoMember);
+        
+        /* We also add the country location. Since this is a set only the last read entry will
+         * be retained. Because this entry corresponds to a city *in* that country it will not necessarily
+         * have the countries center coordinates. In a later pass we will overwrite with country specific
+         * coordinates, but these are not available in this dataset for all countries, so with the next
+         * lines we ensure we have *some* coordinate for the country.
+         */
+        
+        geoMember.clear();
+        geoMember.put(country, gc);
+        p.geoadd(prefix + ":geocountries",geoMember);
 	}
 }

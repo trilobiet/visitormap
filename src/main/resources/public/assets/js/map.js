@@ -90,11 +90,11 @@ document.body.addEventListener('htmx:load', function(evt) {
 
 function renderMarkers(map, markersGroup) {
 	
-	console.log("Options: ", selPath.options.length)
-	console.log("Path & date: ", selPath.value, " - ", selDate.value)
+	//console.log("Options: ", selPath.options.length)
+	//console.log("Path & date: ", selPath.value, " - ", selDate.value)
 
 	const dims = getDims(map);
-	console.log("Map dimensions: ", dims);
+	//console.log("Map dimensions: ", dims);
 	
 	const params = new URLSearchParams();
 	params.append("lat", dims.lat);
@@ -104,15 +104,15 @@ function renderMarkers(map, markersGroup) {
 	params.append("path", selPath.value);
 	params.append("date", selDate.value);
 	
-	console.log(`/api/markers?${new URLSearchParams(params).toString()}`)
-	console.log('/api/markers?',params)
+	//console.log(`/api/markers?${new URLSearchParams(params).toString()}`)
+	//console.log('/api/markers?',params)
 	// http://localhost:7070/api/markers?lat=51.860167605042925&lon=4.556579589843751&width=90.53323848030078&height=51.25580116315021
 	
 	fetch(`/api/markers?${params}`)
 		.then(response => response.json())
 		.then(geoJsonData => {
 		
-		console.log(geoJsonData)
+		//console.log(geoJsonData)
 		
 	    markersGroup.clearLayers();
 	    

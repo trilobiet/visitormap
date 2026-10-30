@@ -16,8 +16,7 @@ import redis.clients.jedis.Pipeline;
 
 public class SWWLogRowIngestionStrategy implements RowIngestionStrategy {
 	
-	// Maybe wrap some reusable behavior (checkUserAgent, checkHttpStatus, checkRequestString)
-	// in (configurable through extra params) decorators
+	private static final String NAME = "subwayworld";
 
 	private final String scriptID;
 	private final DateFormatter df = new DateFormatter("dd/MMM/yyyy:HH:mm:ss");
@@ -29,6 +28,12 @@ public class SWWLogRowIngestionStrategy implements RowIngestionStrategy {
 
 		this.scriptID = scriptID;
 	}
+	
+
+	@Override
+	public String getName() {
+		return NAME;
+	}	
 	
 	
 	private int idx(String s) {
@@ -125,6 +130,6 @@ public class SWWLogRowIngestionStrategy implements RowIngestionStrategy {
 			||
 			startOfString.stream().anyMatch(request::startsWith)
 		);
-	}	
+	}
 
 }

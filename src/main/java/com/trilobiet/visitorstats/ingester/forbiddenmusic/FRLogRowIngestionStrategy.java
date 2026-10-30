@@ -15,6 +15,8 @@ import com.trilobiet.visitorstats.ingester.RowIngestionStrategy;
 import redis.clients.jedis.Pipeline;
 
 public class FRLogRowIngestionStrategy implements RowIngestionStrategy {
+	
+	private static final String NAME = "forbiddenmusic";
 
 	private final String scriptID;
 	private final DateFormatter df = new DateFormatter("dd/MMM/yyyy:HH:mm:ss");
@@ -27,6 +29,10 @@ public class FRLogRowIngestionStrategy implements RowIngestionStrategy {
 		this.scriptID = scriptID;
 	}
 	
+	@Override
+	public String getName() {
+		return NAME;
+	}
 	
 	private int idx(String s) {
 		return columns.indexOf(s); 

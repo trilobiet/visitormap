@@ -34,9 +34,16 @@ public class RedisDaoImpl implements RedisDao {
 			.byBox(widthKm, heightKm, GeoUnit.KM)
 			.withCoord();
 		
-		List<GeoRadiusResponse> lstGeo = redisClient.geosearch("sww:geo", geoParams);
+		List<GeoRadiusResponse> lstGeo;
 		
-		// lstGeo.forEach(geo -> System.out.println(geo.getMemberByString() + " : " + geo.getCoordinate()));
+		System.out.println("WIDTH KM: " + widthKm);
+		
+		if (widthKm > 30000) lstGeo = redisClient.geosearch("sww:geocountries", geoParams);
+		else lstGeo = redisClient.geosearch("sww:geo", geoParams);
+		
+		lstGeo.forEach(geo -> { 
+			if (!geo.getMemberByString().contains(":")) System.out.println(geo.getMemberByString() + " : " + geo.getCoordinate());
+		});
 		
 		// STEP 2. ZRANGE sww:visits:/news:2026-09-28 +inf 1 BYSCORE REV WITHSCORES [LIMIT 0 20]
 		// second number in (+inf 1) denotes minimum score when we run BYSCORE 
@@ -75,8 +82,14 @@ public class RedisDaoImpl implements RedisDao {
 		
 		System.out.println("Locations: " + lstLocations.size());
 		
+		lstLocations.forEach(loc -> { 
+			if(!loc.name().contains(":")) System.out.println(loc);
+		});
+		
+		
 		return lstLocations;
 	}	
+	
 
 	@Override
 	public Set<String> getKeys() {
