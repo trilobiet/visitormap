@@ -1,13 +1,16 @@
 package com.trilobiet.visitorstats.ingester;
 
 import java.nio.file.Path;
+import java.util.Arrays;
 
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.CommandLineParser;
 import org.apache.commons.cli.DefaultParser;
+import org.apache.commons.cli.HelpFormatter;
 import org.apache.commons.cli.Option;
 import org.apache.commons.cli.OptionGroup;
 import org.apache.commons.cli.Options;
+import org.apache.commons.cli.ParseException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -30,11 +33,30 @@ public class App {
 		 * prefix "sww" 
 		 * cleanup true 
 		 * strategyname 
-		 * file
-		 * dir
-		 * 
+		 * file/dir
+		 *
+		 * cmd from eclipse:
+		 * mvn exec:java -Dexec.mainClass="com.trilobiet.visitorstats.ingester.App" -Dexec.args="-p sww -s mystrategy -f mypath" 
 		 */
-
+		
+		Options options = cmdOptions(); 
+		
+		// Parse args[]
+		CommandLineParser parser = new DefaultParser();
+        HelpFormatter formatter = new HelpFormatter();
+        CommandLine cmd;
+        
+        try {
+            cmd = parser.parse(options, args);
+        } catch (ParseException e) {
+            System.err.println("Error parsing arguments: " + e.getMessage());
+            formatter.printHelp("MainApp", options);
+            System.exit(1);
+            return;
+        }
+        
+        Arrays.asList(cmd.getOptions()).forEach(System.out::println);
+/*
 		String prefix = "sww";
 
 		CommandLineParser parser = new DefaultParser();
@@ -57,11 +79,9 @@ public class App {
 			ipIngester.ingestCSV(Path.of("/home/acdhirr/Downloads/logs/ip2location/IP2LOCATION-LITE-DB5.CSV"));
 			logger.info("Ingestion ready!");
 
-			/*
-			 * IP2LOCATION also contains *some* clean country coordinates that we will
-			 * harvest in this pass. These will overwrite the crude country harvesting that
-			 * was done at the Ip ingestion.
-			 */
+			// IP2LOCATION also contains *some* clean country coordinates that we will
+			// harvest in this pass. These will overwrite the crude country harvesting that
+			// was done at the Ip ingestion.
 			logger.info("Starting Country ingestion...");
 			CSV2RedisIngester countryIngester = new CSV2RedisIngester(redisClient,
 					new IPRowIngestionCountryStrategy(prefix));
@@ -75,10 +95,13 @@ public class App {
 			CSVIngestSettings settings = new CSVIngestSettings(CSVIngestSettings.Separator.SPACE);
 			logIngester.ingestDirectory(Path.of("/home/acdhirr/Downloads/logs/sww/"), settings);
 			logger.info("Ingestion ready!");
+
 		}
+*/			
+		
 	}
 	
-	private Options cmdOptions() {
+	private static Options cmdOptions() {
 	
 		Option prefix = Option.builder("p").longOpt("prefix").hasArg().type(String.class).required().build();
 		Option cleanUp = Option.builder("c").longOpt("cleanup").type(Boolean.class).build();
