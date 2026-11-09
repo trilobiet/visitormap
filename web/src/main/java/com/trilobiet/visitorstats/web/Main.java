@@ -6,8 +6,6 @@ import java.util.Set;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.trilobiet.visitorstats.ingester.App;
-
 import io.javalin.Javalin;
 import io.javalin.http.staticfiles.Location;
 import redis.clients.jedis.ConnectionPoolConfig;
@@ -15,7 +13,7 @@ import redis.clients.jedis.RedisClient;
 
 public class Main {
 	
-	private static Logger logger = LoggerFactory.getLogger(App.class);
+	private static Logger logger = LoggerFactory.getLogger(Main.class);
 
 	public static void main(String... args) {
 		
