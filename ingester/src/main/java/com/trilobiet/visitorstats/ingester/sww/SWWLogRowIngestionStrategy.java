@@ -9,10 +9,12 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.trilobiet.visitorstats.ingester.DateFormatter;
-import com.trilobiet.visitorstats.ingester.Utils;
+import com.trilobiet.visitorstats.ingester.LuaScripts;
 import com.trilobiet.visitorstats.ingester.RowIngestionStrategy;
+import com.trilobiet.visitorstats.ingester.Utils;
 
 import redis.clients.jedis.Pipeline;
+import redis.clients.jedis.RedisClient;
 
 public class SWWLogRowIngestionStrategy implements RowIngestionStrategy {
 	
@@ -24,9 +26,10 @@ public class SWWLogRowIngestionStrategy implements RowIngestionStrategy {
 		"ip","ignore1","ignore2","datetime","ignore3","request","status","ignore4","referer","user_agent");
 	private Logger logger = LoggerFactory.getLogger(getClass().getName());
 	
-	public SWWLogRowIngestionStrategy(String scriptID) {
+	public SWWLogRowIngestionStrategy(RedisClient redisClient) {
 
-		this.scriptID = scriptID;
+		//this.scriptID = scriptID;
+		scriptID = LuaScripts.loadInsertVisitsScript(redisClient, "sww");
 	}
 	
 

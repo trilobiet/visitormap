@@ -55,7 +55,28 @@ public class App {
             return;
         }
         
-        Arrays.asList(cmd.getOptions()).forEach(System.out::println);
+		final ConnectionPoolConfig poolConfig = new ConnectionPoolConfig();
+		poolConfig.setMaxTotal(64);
+		poolConfig.setMaxIdle(64);
+        
+		try (RedisClient redisClient = RedisClient.builder()
+			.poolConfig(poolConfig)
+			.hostAndPort("localhost", 6379)
+			.build()) {
+			
+			CSV2RedisIngester ingester = new CSV2RedisIngester(redisClient, new IPRowIngestionStrategy(cmd.getOptionValue("prefix")));
+			ingester.ingestCSV(Path.of(cmd.getOptionValue("path")));
+			
+			
+			RowIngestionStrategy q = RowIngestionStrategy.getFor("sww");
+			
+			
+		}	
+        
+        
+        // Arrays.asList(cmd.getOptions()).forEach(opt -> System.out.println(opt.getValue()));
+        
+        
 /*
 		String prefix = "sww";
 

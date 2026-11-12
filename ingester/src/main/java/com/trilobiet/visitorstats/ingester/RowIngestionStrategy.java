@@ -4,8 +4,12 @@ import java.util.List;
 import java.util.ServiceLoader;
 
 import redis.clients.jedis.Pipeline;
+import redis.clients.jedis.RedisClient;
 
 public interface RowIngestionStrategy {
+	
+	// TODO use this to load LUA script and set namespace/prefix
+	// void init(String prefix, RedisClient redisClient);
 	
 	void ingestRow(String[] row, Pipeline p);
 	String getName(); 
@@ -16,7 +20,7 @@ public interface RowIngestionStrategy {
 	 * @param name
 	 * @return corresponding RowIngestionStrategy
 	 */
-	public static RowIngestionStrategy getFor(String name) {
+	public static RowIngestionStrategy getFor(String name, RedisClient redisClient) {
 		
 		/* Scan for implementations of RowIngestionStrategy.
 		 * These can be dropped in /lib folder as a jar. 
